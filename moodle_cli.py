@@ -65,32 +65,22 @@ def assignment(ctx):
     pass
 
 @assignment.command("fetch")
-@click.option('--aid', default=None, type=int, help="Assignment ID")
-@click.option('--cmid', default=None, type=int, help="Assignment Course Module ID")
+@click.argument('aid', type=click.INT)
 @click.pass_obj
-def assignment_fetch(ws, aid, cmid):
-
-    if not aid:
-        if not cmid:
-            raise click.ClickException("Requires either aid or cmid")
+def assignment_fetch(ws, aid):
 
     res = ws.mod_assign_get_assignments([])
 
     asn = None
     courses = res['courses']
     for course in courses:
-        if not asn:
-            asns = course['assignments']
-            for a in asns:
-                if aid:
-                    if (a['id'] == aid):
-                        asn = a
-                        break
-                elif cmid:
-                    if (a['cmid'] == cmid):
-                        asn = a
-                        break
-        else:
+        assignments = course['assignments']
+        for assignment in assignments:
+            if (assignment['id'] == aid):
+                asn = assignment
+            if asn:
+                break
+        if asn:
             break
 
     if asn:

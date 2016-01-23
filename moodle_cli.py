@@ -89,6 +89,31 @@ def assignment_fetch(ws, aid):
     else:
         raise click.ClickException("Assignment not found")
 
+@assignment.command("view_grades")
+@click.argument('aid', type=click.INT)
+@click.option('--uid', 'uids', type=click.INT, multiple=True, help="User ID")
+@click.pass_obj
+def assignment_view_grades(ws, aid, uids):
+
+    res = ws.mod_assign_get_grades([aid])
+    grades = res['assignments'][0]['grades']
+
+    grades_by_uid = {}
+    for grade in grades:
+        uid = int(grade['userid'])
+        if uids:
+            if uid not in uids:
+                continue
+        if uid not in grades_by_uid:
+            grades_by_uid[uid] = []
+        grades_by_uid[uid].append(grade)
+
+    if res:
+        pp = pprint.PrettyPrinter()
+        click.echo(pp.pformat(grades_by_uid))
+    else:
+        raise click.ClickException("Assignment not found")
+
 
 if __name__ == '__main__':
     cli()

@@ -29,11 +29,43 @@ def cli(ctx, url, token, username, password, service):
         if not ws.authenticate(username, password, service):
             raise click.ClickException("Could not authenticate")
 
-@click.command()
+@cli.group("util")
+@click.pass_context
+def util(ctx):
+    pass
+
+@util.command("cmid_to_aid")
+@click.argument('cmid', type=click.INT)
+@click.pass_obj
+def util_cmid_to_aid(ws, cmid):
+
+    res = ws.mod_assign_get_assignments([])
+
+    asn = None
+    courses = res['courses']
+    for course in courses:
+        asns = course['assignments']
+        for a in asns:
+            if (a['cmid'] == cmid):
+                asn = a
+                break
+
+    if asn:
+        aid = asn['id']
+        click.echo(aid)
+    else:
+        raise click.ClickException("Assignment not found")
+
+@cli.group("assignment")
+@click.pass_context
+def assignment(ctx):
+    pass
+
+@assignment.command("fetch")
 @click.option('--aid', default=None, type=int, help="Assignment ID")
 @click.option('--cmid', default=None, type=int, help="Assignment Course Module ID")
 @click.pass_obj
-def assignment(ws, aid, cmid):
+def assignment_fetch(ws, aid, cmid):
 
     if not aid:
         if not cmid:
@@ -64,12 +96,6 @@ def assignment(ws, aid, cmid):
     else:
         raise click.ClickException("Assignment not found")
 
-@click.command()
-def user():
-    click.echo('Not yet implemented')
-
-cli.add_command(assignment)
-cli.add_command(user)
 
 if __name__ == '__main__':
     cli()

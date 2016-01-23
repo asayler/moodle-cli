@@ -44,11 +44,14 @@ def util_cmid_to_aid(ws, cmid):
     asn = None
     courses = res['courses']
     for course in courses:
-        asns = course['assignments']
-        for a in asns:
-            if (a['cmid'] == cmid):
-                asn = a
+        assignments = course['assignments']
+        for assignment in assignments:
+            if (assignment['cmid'] == cmid):
+                asn = assignment
+            if asn:
                 break
+        if asn:
+            break
 
     if asn:
         aid = asn['id']
